@@ -1,0 +1,320 @@
+<!DOCTYPE html>
+<html lang="tr">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Bütçe ve Harcama Takipçisi</title>
+    <style>
+        body {
+            font-family: 'Arial', sans-serif;
+            background: linear-gradient(135deg, #f5f7fa, #c3cfe2);
+            min-height: 100vh;
+            display: flex;
+            justify-content: center;
+            align-items: center;
+            margin: 0;
+            padding: 20px;
+        }
+
+        .container {
+            background-color: white;
+            width: 400px;
+            padding: 30px;
+            border-radius: 15px;
+            box-shadow: 0 10px 25px rgba(0,0,0,0.1);
+        }
+
+        h2 {
+            text-align: center;
+            margin-top: 0;
+            color: #2c3e50;
+        }
+
+        h4 {
+            margin: 0;
+            text-transform: uppercase;
+            color: #7f8c8d;
+            font-size: 0.8rem;
+        }
+
+        .bakiye-kapsayici {
+            text-align: center;
+            margin: 20px 0;
+        }
+
+        #bakiye {
+            font-size: 2.5rem;
+            margin: 5px 0 0 0;
+            color: #2c3e50;
+        }
+
+        .ozet-kutusu {
+            display: flex;
+            justify-content: space-between;
+            background: #fdfdfd;
+            box-shadow: 0 4px 10px rgba(0,0,0,0.03);
+            padding: 15px;
+            border-radius: 10px;
+            margin-bottom: 20px;
+            border: 1px solid #f1f2f6;
+        }
+
+        .ozet-kutusu > div {
+            flex: 1;
+            text-align: center;
+        }
+
+        .ozet-kutusu > div:first-child {
+            border-right: 1px solid #f1f2f6;
+        }
+
+        .para {
+            font-size: 1.2rem;
+            font-weight: bold;
+            margin: 5px 0 0 0;
+        }
+
+        .arti { color: #2ecc71; }
+        .eksi { color: #e74c3c; }
+
+        .form-grup {
+            margin-bottom: 15px;
+        }
+
+        label {
+            display: block;
+            margin-bottom: 5px;
+            color: #34495e;
+            font-weight: bold;
+            font-size: 0.9rem;
+        }
+
+        input, select {
+            width: 100%;
+            padding: 10px;
+            border: 2px solid #e0e0e0;
+            border-radius: 8px;
+            box-sizing: border-box;
+            outline: none;
+            font-size: 1rem;
+        }
+
+        input:focus, select:focus {
+            border-color: #3498db;
+        }
+
+        .btn {
+            width: 100%;
+            background-color: #3498db;
+            color: white;
+            border: none;
+            padding: 12px;
+            border-radius: 8px;
+            cursor: pointer;
+            font-size: 1rem;
+            font-weight: bold;
+            transition: background 0.2s;
+        }
+
+        .btn:hover { background-color: #2980b9; }
+
+        .liste-baslik {
+            border-bottom: 1px solid #bbb;
+            padding-bottom: 10px;
+            margin: 30px 0 10px 0;
+            color: #2c3e50;
+        }
+
+        .liste {
+            list-style-type: none;
+            padding: 0;
+            margin: 0;
+            max-height: 200px;
+            overflow-y: auto;
+        }
+
+        .liste li {
+            background-color: #fff;
+            color: #333;
+            display: flex;
+            justify-content: space-between;
+            position: relative;
+            padding: 10px;
+            margin: 10px 0;
+            border-radius: 6px;
+            box-shadow: 0 2px 5px rgba(0,0,0,0.05);
+            border-right: 5px solid #bbb;
+        }
+
+        .liste li.gelir-sinifi { border-right-color: #2ecc71; }
+        .liste li.gider-sinifi { border-right-color: #e74c3c; }
+
+        .sil-btn {
+            cursor: pointer;
+            background-color: #e74c3c;
+            border: none;
+            color: white;
+            font-size: 0.8rem;
+            padding: 2px 8px;
+            border-radius: 4px;
+            opacity: 0;
+            transition: opacity 0.2s ease;
+        }
+
+        .liste li:hover .sil-btn { opacity: 1; }
+    </style>
+</head>
+<body>
+
+    <div class="container">
+        <h2>Bütçe Takipçisi</h2>
+
+        <div class="bakiye-kapsayici">
+            <h4>Net Bakiye</h4>
+            <h1 id="bakiye">0.00 TL</h1>
+        </div>
+
+        <div class="ozet-kutusu">
+            <div>
+                <h4>Gelir</h4>
+                <p id="gelir-ozet" class="para arti">+0.00 TL</p>
+            </div>
+            <div>
+                <h4>Gider</h4>
+                <p id="gider-ozet" class="para eksi">-0.00 TL</p>
+            </div>
+        </div>
+
+        <form id="form">
+            <div class="form-grup">
+                <label for="text">Açıklama</label>
+                <input type="text" id="text" placeholder="Örn: Maaş, Market, Kira..." required />
+            </div>
+            <div class="form-grup">
+                <label for="type">İşlem Türü</label>
+                <select id="type">
+                    <option value="gelir">Gelir (+)</option>
+                    <option value="gider">Gider (-)</option>
+                </select>
+            </div>
+            <div class="form-grup">
+                <label for="amount">Miktar (TL)</label>
+                <input type="number" id="amount" step="0.01" placeholder="Miktar giriniz..." required />
+            </div>
+            <button class="btn">İşlem Ekle</button>
+        </form>
+
+        <h3 class="liste-baslik">Geçmiş İşlemler</h3>
+        <ul id="liste" class="liste">
+            <!-- JavaScript ile dolacak -->
+        </ul>
+    </div>
+
+    <script>
+        const bakiye = document.getElementById('bakiye');
+        const gelirOzet = document.getElementById('gelir-ozet');
+        const giderOzet = document.getElementById('gider-ozet');
+        const liste = document.getElementById('liste');
+        const form = document.getElementById('form');
+        const text = document.getElementById('text');
+        const amount = document.getElementById('amount');
+        const type = document.getElementById('type');
+
+        // Tarayıcı hafızasından verileri çekiyoruz (Yoksa boş dizi başlatıyoruz)
+        let islemler = localStorage.getItem('islemler') !== null ? JSON.parse(localStorage.getItem('islemler')) : [];
+
+        // Yeni işlem ekleme fonksiyonu
+        function islemEkle(e) {
+            e.preventDefault();
+
+            // Miktarı sayıya çeviriyoruz
+            let islemMiktari = parseFloat(amount.value);
+            
+            // Eğer gider seçildiyse sayıyı eksiye çeviriyoruz
+            if (type.value === 'gider') {
+                islemMiktari = -Math.abs(islemMiktari);
+            }
+
+            const yeniIslem = {
+                id: Math.floor(Math.random() * 100000000),
+                text: text.value,
+                amount: islemMiktari
+            };
+
+            islemler.push(yeniIslem);
+            listeElemaniEkle(yeniIslem);
+            degerleriGuncelle();
+            hafizayaKaydet();
+
+            // Formu temizle
+            text.value = '';
+            amount.value = '';
+            type.value = 'gelir';
+        }
+
+        // İşlemleri HTML listesine ekleme fonksiyonu
+        function listeElemaniEkle(islem) {
+            // Gelir mi gider mi olduğunu belirliyoruz
+            const islemTuruSinifi = islem.amount < 0 ? 'gider-sinifi' : 'gelir-sinifi';
+            const isaret = islem.amount < 0 ? '-' : '+';
+            
+            const li = document.createElement('li');
+            li.classList.add(islemTuruSinifi);
+
+            li.innerHTML = `
+                ${islem.text} <span>${isaret}${Math.abs(islem.amount).toFixed(2)} TL</span>
+                <button class="sil-btn" onclick="islemSil(${islem.id})">Sil</button>
+            `;
+
+            liste.appendChild(li);
+        }
+
+        // Toplam bakiye, gelir ve gider özetlerini güncelleyen fonksiyon
+        function degerleriGuncelle() {
+            const miktarlar = islemler.map(islem => islem.amount);
+
+            // Toplam Bakiye
+            const toplam = miktarlar.reduce((acc, item) => (acc += item), 0).toFixed(2);
+
+            // Toplam Gelir
+            const gelir = miktarlar
+                .filter(item => item > 0)
+                .reduce((acc, item) => (acc += item), 0)
+                .toFixed(2);
+
+            // Toplam Gider
+            const gider = (miktarlar
+                .filter(item => item < 0)
+                .reduce((acc, item) => (acc += item), 0) * -1)
+                .toFixed(2);
+
+            // Ekrana yazdırma
+            bakiye.innerText = `${toplam} TL`;
+            gelirOzet.innerText = `+${gelir} TL`;
+            giderOzet.innerText = `-${gider} TL`;
+        }
+
+        // İşlem silme fonksiyonu
+        function islemSil(id) {
+            islemler = islemler.filter(islem => islem.id !== id);
+            hafizayaKaydet();
+            uygulamayiBaslat();
+        }
+
+        // Verileri tarayıcı hafızasına (LocalStorage) yazma
+        function hafizayaKaydet() {
+            localStorage.setItem('islemler', JSON.stringify(islemler));
+        }
+
+        // Uygulamayı ilk açılışta yükleme fonksiyonu
+        function uygulamayiBaslat() {
+            liste.innerHTML = '';
+            islemler.forEach(listeElemaniEkle);
+            degerleriGuncelle();
+        }
+
+        form.addEventListener('submit', islemEkle);
+        uygulamayiBaslat();
+    </script>
+</body>
+</html>
